@@ -27,4 +27,6 @@ class Player(pygame.sprite.Sprite):
         pygame.sprite.Sprite.__init__(self)
         self.image = pygame.Surface((30, 30))
         self.image.fill(WHITE)
-        self.rect = self.image.get_rect()  # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
+        self.rect = self.image.get_rect()
+        # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
+        self.rect.center = (WIDTH / 2, HEIGHT / 2)

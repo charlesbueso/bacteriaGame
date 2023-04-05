@@ -9,6 +9,7 @@ HEIGHT = 750
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
 timer = pygame.time.Clock()
 fps = 60
+bacteriaVelocity = 22
 pygame.display.set_caption("Bacteria Game!")
 pygame.mouse.set_visible(False)
 
@@ -20,11 +21,29 @@ class Bacteria(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.movex = 0 # move along X
+        self.movey = 0 # move along Y
+        self.frame = 0 # count frames
 
     def update(self):
-         mousePosition = pygame.mouse.get_pos()
-         self.rect.x = mousePosition[0]
-         self.rect.y = mousePosition[1]
+
+        bacteria_x, bacteria_y = self.rect.center
+
+         # calculate the distance between the player and the mouse
+        dx = mouse_x - bacteria_x
+        dy = mouse_y - bacteria_y
+        dist = math.hypot(dx, dy)
+    
+        # if the distance is greater than the player's speed, move the player closer to the mouse
+        if dist > bacteriaVelocity:
+            angle = math.atan2(dy, dx)
+            bacteria_x += bacteriaVelocity * math.cos(angle)
+            bacteria_y += bacteriaVelocity * math.sin(angle)
+        else:
+            bacteria_x = mouse_x
+            bacteria_y = mouse_y
+
+        self.rect.x, self.rect.y = bacteria_x, bacteria_y
 
 class Antidote(pygame.sprite.Sprite):
     def __init__(self):
@@ -34,12 +53,13 @@ class Antidote(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
+        self.movex = 0 # move along X
+        self.movey = 0 # move along Y
+        self.frame = 0 # count frames
 
-    #Must find offset between player center and game box, substract to other side
-    #def update(self):
-    #     mousePosition = pygame.mouse.get_pos()
-    #     self.rect.x = mousePosition[0]
-    #     self.rect.y = mousePosition[1]
+    #Missing update function
+    #Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
+    #def update():
          
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
@@ -67,14 +87,24 @@ class CameraGroup(pygame.sprite.Group):
         ground_offset = self.ground_rect.topleft - self.offset
         self.display_surface.blit(self.ground_surf,ground_offset)
 
+        #active elements
+        for sprite in sorted(self.sprites(),key = lambda sprite: sprite.rect.centery):
+            offset_pos = sprite.rect.topleft - self.offset
+            self.display_surface.blit(sprite.image,offset_pos)
+
 
 
 pygame.init()
 
 all_sprites_list = pygame.sprite.Group()
 bacteria = Bacteria()
+Bacteria.image = pygame.Surface([30, 30])
+Bacteria.rect = Bacteria.image.get_rect()
 camera = CameraGroup()
 all_sprites_list.add(bacteria)
+
+mutationCounter = 0
+
 
 # main game loop
 running = True
@@ -82,6 +112,7 @@ while running:
 
     screen.fill('white')
     timer.tick(fps)
+    mouse_x, mouse_y = pygame.mouse.get_pos()
     
     camera.update()
     camera.custom_draw(bacteria)
@@ -89,7 +120,7 @@ while running:
     all_sprites_list.update()
     all_sprites_list.draw(screen)
     
-
+    
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
@@ -97,18 +128,3 @@ while running:
     pygame.display.flip()
 
 pygame.quit()
-
-def center_camera_to_player(self):
-        screen_center_x = self.player_sprite.center_x - (self.camera.viewport_width / 2)
-        screen_center_y = self.player_sprite.center_y - (
-            self.camera.viewport_height / 2
-        )
-
-        # Don't let camera travel past 0
-        if screen_center_x < 0:
-            screen_center_x = 0
-        if screen_center_y < 0:
-            screen_center_y = 0
-        player_centered = screen_center_x, screen_center_y
-
-        self.camera.move_to(player_centered)

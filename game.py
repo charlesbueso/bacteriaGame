@@ -11,7 +11,7 @@ timer = pygame.time.Clock()
 fps = 60
 bacteriaVelocity = 22
 pygame.display.set_caption("Bacteria Game!")
-pygame.mouse.set_visible(False)
+pygame.mouse.set_visible(True)
 
 class Bacteria(pygame.sprite.Sprite):
     def __init__(self):
@@ -24,26 +24,25 @@ class Bacteria(pygame.sprite.Sprite):
         self.movex = 0 # move along X
         self.movey = 0 # move along Y
         self.frame = 0 # count frames
+        self.speed = 1.5 # speed of the bacteria
 
     def update(self):
 
-        bacteria_x, bacteria_y = self.rect.center
-
-         # calculate the distance between the player and the mouse
-        dx = mouse_x - bacteria_x
-        dy = mouse_y - bacteria_y
-        dist = math.hypot(dx, dy)
-    
-        # if the distance is greater than the player's speed, move the player closer to the mouse
-        if dist > bacteriaVelocity:
-            angle = math.atan2(dy, dx)
-            bacteria_x += bacteriaVelocity * math.cos(angle)
-            bacteria_y += bacteriaVelocity * math.sin(angle)
+        # current mouse position
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+            
+        dx = mouse_x - self.rect.centerx
+        dy = mouse_y - self.rect.centery
+        dist = ((dx ** 2) + (dy ** 2)) ** 0.5 # distance between the mouse and the bacteria (Pythagorean theorem)
+        
+        if dist > self.speed:
+            self.rect.centerx += dx * self.speed / dist
+            self.rect.centery += dy * self.speed / dist
         else:
-            bacteria_x = mouse_x
-            bacteria_y = mouse_y
+            self.rect.centerx = mouse_x
+            self.rect.centery = mouse_y
 
-        self.rect.x, self.rect.y = bacteria_x, bacteria_y
+        
 
 class Antidote(pygame.sprite.Sprite):
     def __init__(self):

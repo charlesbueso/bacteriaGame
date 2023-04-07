@@ -71,9 +71,9 @@ class Antidote(pygame.sprite.Sprite):
 
 # TODO: fix the food to there location so that they stay put relative to the bacteria
 class food(pygame.sprite.Sprite):
-    def __init__(self, x, y, color):
+    def __init__(self, x, y, color, size):
         super().__init__()
-        self.image = pygame.Surface((20, 20))
+        self.image = pygame.Surface((size, size))
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
@@ -82,11 +82,13 @@ class food(pygame.sprite.Sprite):
         if checkCollision(self.rect.center, food_data):
             self.kill()
 
-def createFood_Data(food_list, n): # creats a list of random food locations and colors
+def createFood_Data(food_list, n): # creats a list of random food locations, colors, and sizes
+     
      for i in range(n):
         while True:
              x = random.randrange(0, WIDTH)
              y = random.randrange(0, HEIGHT)
+             size = random.randrange(5,45) #implement with global bacteria size (e.g. bacteriaSize - 25, bacteriaSize + 15)
              foodExists = False
              for food in food_list:
                  if (x, y) == food[0:2]: #checks if the food (x, y) is already in the list
@@ -95,12 +97,12 @@ def createFood_Data(food_list, n): # creats a list of random food locations and 
              if not foodExists: #breaks out of the loop if the food doesn't exist so we can append it to the list
                  break
             
-        food_list.append((x, y, random.choice(colors))) #add data to list
+        food_list.append((x, y, random.choice(colors),size)) #add data to list
 
 
 def createFood_Obj(food_list, foodGroup): #creates food objects
     for i in range(len(food_list)):
-        foodGroup.add(food(food_list[i][0], food_list[i][1], food_list[i][2]))
+        foodGroup.add(food(food_list[i][0], food_list[i][1], food_list[i][2],food_list[i][3]))
 
 def checkCollision(player, food): #not yet implemented
     for i in range(len(food)):
@@ -160,7 +162,7 @@ def game_loop():
         
         camera.update()
         camera.custom_draw(bacteria)
-
+        
         all_sprites_list.update()
         all_sprites_list.draw(screen)
         food_group.draw(screen)

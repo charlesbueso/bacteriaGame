@@ -146,6 +146,10 @@ def game_loop():
     running = True
     while running:
 
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
         screen.fill('white')
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -160,21 +164,17 @@ def game_loop():
         all_sprites_list.update()
         all_sprites_list.draw(screen)
         food_group.draw(screen)
-    
-    
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
 
-    pygame.display.update()
-    pygame.display.flip()
+        pygame.display.update()
+        pygame.display.flip()
 
 def text_objects(text, font):
+
     textSurface = font.render(text, True, 'black')
     return textSurface, textSurface.get_rect()
 
 def button(message,x,y,width,height,inactiveColor,activeColor,action=None):
-    global gameRunning
+
     mouse_x, mouse_y = pygame.mouse.get_pos()
     click = pygame.mouse.get_pressed()
 

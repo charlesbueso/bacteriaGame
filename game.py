@@ -230,7 +230,7 @@ camera = CameraGroup()
 mutationCounter = 0
 
 # menu
-#game_intro()
+game_intro()
 # main loop
 game_loop()
 # quit

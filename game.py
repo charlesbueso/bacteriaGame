@@ -78,7 +78,7 @@ class food(pygame.sprite.Sprite):
         self.rect.center = (x, y)
         #TODO:maybe needs an update function?
 
-def createFood_Data(food_list, n): # creats a list of random food locations and colors
+def createFood_Data(food_list, n): # creats a list of random food locations, colors, and sizes    
      for i in range(n):
         while True:
              x = random.randrange(0, 1200)
@@ -91,7 +91,7 @@ def createFood_Data(food_list, n): # creats a list of random food locations and 
              if not foodExists: #breaks out of the loop if the food doesn't exist so we can append it to the list
                  break
             
-        food_list.append((x, y, random.choice(colors))) #add data to list
+        food_list.append((x, y, random.choice(colors),size)) #add data to list
 
 
 def createFood_Obj(food_list, foodGroup, cameraGroup): #creates food objects

@@ -13,8 +13,10 @@ fps = 60
 bacteriaVelocity = 22
 pygame.display.set_caption("Bacteria Game!")
 pygame.mouse.set_visible(True)
-colors = [(155,93,229), (241, 91, 181), (254,228, 64), (0,187,249), (0,245,212)] #food colors
+foodColors = [(155,93,229), (241, 91, 181), (254,228, 64), (0,187,249), (0,245,212)] #food colors
+antidoteColor = (0, 0, 0) #antidote color: black
 food_data = [] #stores food positions and colors
+antidote_data = [] #stores antidote positions and colors
 
 class Bacteria(pygame.sprite.Sprite):
     def __init__(self):
@@ -47,27 +49,44 @@ class Bacteria(pygame.sprite.Sprite):
 
     #Missing update function
     #Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
-        
-class Antidote(pygame.sprite.Sprite):
-    def __init__(self):
-        super().__init__()
-        self.image = pygame.Surface((30,30))
-        self.image.fill('blue')
-        self.rect = self.image.get_rect()
-        # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
-        self.rect.center = (WIDTH / 2, HEIGHT / 2)
-        self.movex = 0 # move along X
-        self.movey = 0 # move along Y
-        self.frame = 0 # count frames
 
-    def update(self):
-        checkCollision(self.rect.center, food_data)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-        dx = 0
-        dy = 0  
+#TODO: Add movement of antidotes? and randomize size        
+class Antidote(pygame.sprite.Sprite):
+    def __init__(self, x, y, color, group):
+        super().__init__(group)
+        self.image = pygame.Surface((30, 30))
+        self.image.fill(color)
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        #TODO:maybe needs an update function?
+
+    # def update(self):
+    #     checkCollision(self.rect.center, food_data)
+    #     mouse_x, mouse_y = pygame.mouse.get_pos()
+    #     dx = 0
+    #     dy = 0  
 
     #Missing update function
     #Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
+
+def createAntidote_Data(antidote_list, n):
+    for i in range(n):
+        while True:
+            x = random.randrange(0, 1200)
+            y = random.randrange(0, 1500)
+            antidoteExists = False
+            for antidote in antidote_list:
+                if (x, y) == antidote[0:2]: #checks if the antidote (x, y) is already in the list
+                    antidoteExists = True #breaks out of the loop to go back to the while loop (so we can regenerate an x & y)
+                    break
+            if not antidoteExists: #breaks out of the loop if the antidote doesn't exist so we can append it to the list
+                break
+            
+        antidote_list.append((x, y, antidoteColor)) #add data to list
+
+def createAntidote_Obj(antidote_list, antidoteGroup, cameraGroup):
+    for i in range(len(antidote_list)):
+        antidoteGroup.add(Antidote(antidote_list[i][0], antidote_list[i][1], antidote_list[i][2], cameraGroup))
 
 class food(pygame.sprite.Sprite):
     def __init__(self, x, y, color, group):
@@ -91,7 +110,7 @@ def createFood_Data(food_list, n): # creats a list of random food locations, col
              if not foodExists: #breaks out of the loop if the food doesn't exist so we can append it to the list
                  break
             
-        food_list.append((x, y, random.choice(colors))) #add data to list
+        food_list.append((x, y, random.choice(foodColors))) #add data to list
 
 
 def createFood_Obj(food_list, foodGroup, cameraGroup): #creates food objects
@@ -175,15 +194,17 @@ def game_loop():
         if len(food_data) < 100: #replenish food
             createFood_Data(food_data,random.randrange(150, 250))
             createFood_Obj(food_data, food_group, camera)
-            # food_group.draw(screen)
+        
+        if len(antidote_data) < 50: #replenish antidote enemies
+            createAntidote_Data(antidote_data,random.randrange(40, 75))
+            createAntidote_Obj(antidote_data, antidote_group, camera)
         
         camera.update()
         camera.custom_draw(bacteria)
-        #food_group.update()
 
         all_sprites_list.update()
         all_sprites_list.draw(screen)
-        # food_group.draw(screen)
+        
         
         for event in pygame.event.get():
             if event.type == pygame.QUIT:# if user hits red x button close window
@@ -227,6 +248,7 @@ all_sprites_list = pygame.sprite.Group()
 bacteria = Bacteria()
 all_sprites_list.add(bacteria)
 food_group = pygame.sprite.Group() # Define a sprite group ONLY for the food objects
+antidote_group = pygame.sprite.Group() # Define a sprite group ONLY for the antidote objects
 camera = CameraGroup()
 mutationCounter = 0
 

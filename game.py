@@ -2,7 +2,7 @@ import pygame
 import time
 import math
 import random
-
+import sys
 
 #Global variables
 WIDTH = 900
@@ -69,24 +69,20 @@ class Antidote(pygame.sprite.Sprite):
     #Missing update function
     #Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
 
-# TODO: fix the food to there location so that they stay put relative to the bacteria
 class food(pygame.sprite.Sprite):
-    def __init__(self, x, y, color):
-        super().__init__()
+    def __init__(self, x, y, color, group):
+        super().__init__(group)
         self.image = pygame.Surface((20, 20))
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-    
-    def update(self):
-        if checkCollision(self.rect.center, food_data):
-            self.kill()
+        #TODO:maybe needs an update function?
 
 def createFood_Data(food_list, n): # creats a list of random food locations and colors
      for i in range(n):
         while True:
-             x = random.randrange(0, WIDTH)
-             y = random.randrange(0, HEIGHT)
+             x = random.randrange(0, 1200)
+             y = random.randrange(0, 1500)
              foodExists = False
              for food in food_list:
                  if (x, y) == food[0:2]: #checks if the food (x, y) is already in the list
@@ -98,9 +94,9 @@ def createFood_Data(food_list, n): # creats a list of random food locations and 
         food_list.append((x, y, random.choice(colors))) #add data to list
 
 
-def createFood_Obj(food_list, foodGroup): #creates food objects
+def createFood_Obj(food_list, foodGroup, cameraGroup): #creates food objects
     for i in range(len(food_list)):
-        foodGroup.add(food(food_list[i][0], food_list[i][1], food_list[i][2]))
+        foodGroup.add(food(food_list[i][0], food_list[i][1], food_list[i][2], cameraGroup))
 
 def checkCollision(player, food): #not yet implemented
     for i in range(len(food)):
@@ -140,39 +136,6 @@ class CameraGroup(pygame.sprite.Group):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image,offset_pos)
 
-
-def game_loop():
-    #intro = False
-    running = True
-    while running:
-
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                running = False
-
-        screen.fill('white')
-        timer.tick(fps)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-        if len(food_data) < 100: #replenish food
-            createFood_Data(food_data,random.randrange(150, 250))
-            createFood_Obj(food_data, food_group)
-        
-        camera.update()
-        camera.custom_draw(bacteria)
-
-        all_sprites_list.update()
-        all_sprites_list.draw(screen)
-        food_group.draw(screen)
-
-        pygame.display.update()
-        pygame.display.flip()
-
-def text_objects(text, font):
-
-    textSurface = font.render(text, True, 'black')
-    return textSurface, textSurface.get_rect()
-
 def button(message,x,y,width,height,inactiveColor,activeColor,action=None):
 
     mouse_x, mouse_y = pygame.mouse.get_pos()
@@ -191,16 +154,61 @@ def button(message,x,y,width,height,inactiveColor,activeColor,action=None):
     textRect.center = ((x+(width/2)), (y+(height/2)))
     screen.blit(textSurf, textRect)
 
+def text_objects(text, font):
+
+    textSurface = font.render(text, True, 'black')
+    return textSurface, textSurface.get_rect()
+
+def game_loop():
+    #intro = False
+    running = True
+    while running:
+
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+
+        screen.fill('white')
+        timer.tick(fps)
+        mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        if len(food_data) < 100: #replenish food
+            createFood_Data(food_data,random.randrange(150, 250))
+            createFood_Obj(food_data, food_group, camera)
+            # food_group.draw(screen)
+        
+        camera.update()
+        camera.custom_draw(bacteria)
+        #food_group.update()
+
+        all_sprites_list.update()
+        all_sprites_list.draw(screen)
+        # food_group.draw(screen)
+        
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:# if user hits red x button close window
+                running = False
+                pygame.quit()
+                sys.exit()
+                
+            if event.type == pygame.KEYDOWN:# if user hits a escape key close program
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    pygame.quit()
+                    sys.exit()
+
+
+        pygame.display.update()
+        pygame.display.flip()
+
+
 def game_intro():
-
     intro = True
-
     while intro:
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
-                quit()
-                
+                sys.exit()
         screen.fill('white')
         largeText = pygame.font.Font('titlefont.ttf',100)
         TextSurf, TextRect = text_objects("Bacteria Game", largeText)
@@ -216,16 +224,9 @@ def game_intro():
 pygame.init()
 
 all_sprites_list = pygame.sprite.Group()
-
 bacteria = Bacteria()
 all_sprites_list.add(bacteria)
-Bacteria.image = pygame.Surface([30, 30])
-Bacteria.rect = Bacteria.image.get_rect()
-
 food_group = pygame.sprite.Group() # Define a sprite group ONLY for the food objects
-createFood_Data(food_data,random.randrange(150, 250)) #create a list of random food locations
-createFood_Obj(food_data, food_group) #create food objects and add to group
-
 camera = CameraGroup()
 mutationCounter = 0
 

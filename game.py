@@ -91,7 +91,7 @@ def createFood_Data(food_list, n): # creats a list of random food locations, col
              if not foodExists: #breaks out of the loop if the food doesn't exist so we can append it to the list
                  break
             
-        food_list.append((x, y, random.choice(colors),size)) #add data to list
+        food_list.append((x, y, random.choice(colors))) #add data to list
 
 
 def createFood_Obj(food_list, foodGroup, cameraGroup): #creates food objects

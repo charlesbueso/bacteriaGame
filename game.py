@@ -58,7 +58,7 @@ class Antidote(pygame.sprite.Sprite):
     def __init__(self, x, y, color, group):
         super().__init__(group)
         self.image = pygame.Surface((30, 30))
-        self.image.fill(color)
+        self.image = antidoteImage
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         #TODO:maybe needs an update function?

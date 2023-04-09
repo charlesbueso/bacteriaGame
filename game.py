@@ -17,6 +17,9 @@ foodColors = [(155,93,229), (241, 91, 181), (254,228, 64), (0,187,249), (0,245,2
 antidoteColor = (0, 0, 0) #antidote color: black
 food_data = [] #stores food positions and colors
 antidote_data = [] #stores antidote positions and colors
+mutation_data = [] #stores mutation positions and colors
+antidoteImage = pygame.image.load("antidote.png")
+mutationImage = pygame.image.load("mutation.png")
 
 class Bacteria(pygame.sprite.Sprite):
     def __init__(self):
@@ -112,10 +115,38 @@ def createFood_Data(food_list, n): # creats a list of random food locations, col
             
         food_list.append((x, y, random.choice(foodColors))) #add data to list
 
-
 def createFood_Obj(food_list, foodGroup, cameraGroup): #creates food objects
     for i in range(len(food_list)):
         foodGroup.add(food(food_list[i][0], food_list[i][1], food_list[i][2], cameraGroup))
+
+class mutation(pygame.sprite.Sprite):
+    def __init__(self, x, y, group):
+        super().__init__(group)
+        self.image = pygame.Surface((20, 20))
+        self.image = mutationImage
+        self.rect = self.image.get_rect()
+        self.rect.center = (x, y)
+        #TODO:maybe needs an update function?
+
+def createMutation_Data(mutation_list, n): #creates a list of random food locations, colors, and sizes    
+    
+     for i in range(n):
+        while True:
+             x = random.randrange(0, 1200)
+             y = random.randrange(0, 1500)
+             mutationExists = False
+             for mutation in mutation_list:
+                 if (x, y) == mutation[0:2]: #checks if the food (x, y) is already in the list
+                     mutationExists = True #breaks out of the loop to go back to the while loop (so we can regenerate an x & y)
+                     break
+             if not mutationExists: #breaks out of the loop if the food doesn't exist so we can append it to the list
+                 break
+            
+        mutation_list.append((x, y)) #add data to list
+
+def createMutation_Obj(mutation_list, mutationGroup, cameraGroup): #creates food objects
+    for i in range(len(mutation_list)):
+        mutationGroup.add(mutation(mutation_list[i][0], mutation_list[i][1], cameraGroup))
 
 def checkCollision(player, food): #not yet implemented
     for i in range(len(food)):
@@ -198,6 +229,10 @@ def game_loop():
         if len(antidote_data) < 50: #replenish antidote enemies
             createAntidote_Data(antidote_data,random.randrange(40, 75))
             createAntidote_Obj(antidote_data, antidote_group, camera)
+
+        if len(mutation_data) < 50: #replenish mutation enemies
+            createMutation_Data(mutation_data,random.randrange(10, 20))
+            createMutation_Obj(mutation_data, mutation_group, camera)
         
         camera.update()
         camera.custom_draw(bacteria)
@@ -249,6 +284,7 @@ bacteria = Bacteria()
 all_sprites_list.add(bacteria)
 food_group = pygame.sprite.Group() # Define a sprite group ONLY for the food objects
 antidote_group = pygame.sprite.Group() # Define a sprite group ONLY for the antidote objects
+mutation_group = pygame.sprite.Group() # Define a sprite group ONLY for the mutation objects
 camera = CameraGroup()
 mutationCounter = 0
 

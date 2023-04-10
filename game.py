@@ -166,7 +166,7 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
         #background
-        self.ground_surf = pygame.image.load('whiteBackground.jpg').convert_alpha()
+        self.ground_surf = pygame.image.load('grid-background.JPG').convert_alpha()
         self.ground_rect = self.ground_surf.get_rect(topleft = (0,0))
     
     def center_target_camera(self,target):

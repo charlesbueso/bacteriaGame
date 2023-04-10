@@ -259,6 +259,8 @@ def game_loop():
 
 
 def game_intro():
+    global buttonList
+
     intro = True
     while intro:
         for event in pygame.event.get():
@@ -271,7 +273,10 @@ def game_intro():
         TextRect.center = ((WIDTH/2),(HEIGHT/2))
         screen.blit(TextSurf, TextRect)
 
-        button("PLAY",385,515,140,75,"yellow","green",game_loop)
+        buttonList = [
+        button("PLAY",385,515,140,75,"yellow","green",game_loop),
+        button("TUTORIAL",350,630,220,75,"yellow","green")
+        ]
 
         pygame.display.update()
         timer.tick(15)

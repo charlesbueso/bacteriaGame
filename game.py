@@ -69,7 +69,6 @@ class Antidote(pygame.sprite.Sprite):
     #Missing update function
     #Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
 
-# TODO: fix the food to there location so that they stay put relative to the bacteria
 class food(pygame.sprite.Sprite):
     def __init__(self, x, y, color, size):
         super().__init__()
@@ -77,10 +76,46 @@ class food(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
+        self.speed = .5 # speed of the bacteria
+        self.direction = 1
     
     def update(self):
-        if checkCollision(self.rect.center, food_data):
-            self.kill()
+        speed_x = self.rect.x
+        speed_y = self.rect.top
+
+        if self.rect.left <= 20 or self.rect.right >= 700:
+            self.direction *= -1
+            speed_x = random.randrange(0, 8) * self.direction
+            speed_y = random.randrange(0, 8) * self.direction
+
+            # Changing the value if speed_x
+            # and speed_y both are zero
+            if speed_x == 0 and speed_y == 0:
+                speed_x = random.randrange(2, 8) * self.direction
+                speed_y = random.randrange(2, 8) * self.direction
+ 
+    # Changing the direction and x,y coordinate
+    # of the object if the coordinate of top
+    # side is less than equal to 20 or bottom side coordinate
+    # is greater than equal to 580
+        if self.rect.top <= 20 or self.rect.bottom >= 700:
+            self.direction *= -1
+            speed_x = random.randrange(0, 8) * self.direction
+            speed_y = random.randrange(0, 8) * self.direction
+    
+            # Changing the value if speed_x
+            # and speed_y both are zero
+            if speed_x == 0 and speed_y == 0:
+                speed_x = random.randrange(2, 8) * self.direction
+                speed_y = random.randrange(2, 8) * self.direction
+    
+        # Adding speed_x and speed_y
+        # in left and top coordinates of object
+        self.rect.left += speed_x
+        self.rect.top += speed_y
+
+        #if checkCollision(self.rect.center, food_data):
+         #   self.kill()
 
 def createFood_Data(food_list, n): # creats a list of random food locations, colors, and sizes
      
@@ -144,7 +179,7 @@ class CameraGroup(pygame.sprite.Group):
 
 
 def game_loop():
-    #intro = False
+
     running = True
     while running:
 
@@ -156,9 +191,9 @@ def game_loop():
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        if len(food_data) < 100: #replenish food
-            createFood_Data(food_data,random.randrange(150, 250))
-            createFood_Obj(food_data, food_group)
+        #if len(food_data) < 100: #replenish food
+         #   createFood_Data(food_data,random.randrange(150, 250))
+          #  createFood_Obj(food_data, food_group)
         
         camera.update()
         camera.custom_draw(bacteria)
@@ -166,6 +201,7 @@ def game_loop():
         all_sprites_list.update()
         all_sprites_list.draw(screen)
         food_group.draw(screen)
+        food_group.update()
 
         pygame.display.update()
         pygame.display.flip()
@@ -225,14 +261,15 @@ Bacteria.image = pygame.Surface([30, 30])
 Bacteria.rect = Bacteria.image.get_rect()
 
 food_group = pygame.sprite.Group() # Define a sprite group ONLY for the food objects
-createFood_Data(food_data,random.randrange(150, 250)) #create a list of random food locations
+#createFood_Data(food_data,random.randrange(150, 250)) #create a list of random food locations
+createFood_Data(food_data,150)
 createFood_Obj(food_data, food_group) #create food objects and add to group
 
 camera = CameraGroup()
 mutationCounter = 0
 
 # menu
-game_intro()
+#game_intro()
 # main loop
 game_loop()
 # quit

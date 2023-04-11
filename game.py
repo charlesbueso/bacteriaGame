@@ -3,6 +3,10 @@ import time
 import math
 import random
 import sys
+import os
+
+pygame.init()
+pygame.font.init()
 
 #Global variables
 WIDTH = 900
@@ -153,7 +157,19 @@ def checkCollision(player, food): #not yet implemented
         if food[i][0] == player.x and food[i][1] == player.y:
             return True
     return False
-
+def scoreKeeper(player, food, mutation):
+    score = 0
+    score_increment = 10
+    if player.colliderect(food):
+        score += score_increment
+    if player.colliderect(mutation):
+        score -= score_increment
+    # Set up the font object
+    font = pygame.font.Font(None, 36)
+    # Draw the score to the screen
+    score_text = font.render(f'Score: {score}', True, (255, 255, 255))
+    screen.blit(score_text, (10, 10))
+    font = pygame.font.Font('arial.ttf', 48)
          
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):

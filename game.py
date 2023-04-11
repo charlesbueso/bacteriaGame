@@ -170,21 +170,21 @@ def checkCollision(player, food):  # not yet implemented
     return False
 
 
-def scorekeeper(player, food, mutation):
-    score = 0
-    score_increment = 10
-    if player.colliderect(food):
-        score += score_increment
-    if player.colliderect(mutation):
-        score -= score_increment
-    # Set up the font object
-    font = pygame.font.Font(None, 36)
-    # Draw the score to the screen
-    score_text = font.render(f'Score: {score}', True, (255, 255, 255))
-    screen.blit(score_text, (10, 10))
-    font = pygame.font.Font('arial.ttf', 48)
-    # Update the display
-    pygame.display.flip()
+class Score(pygame.sprite.Sprite):
+    def __init__(self):
+        self.score = 0
+        self.score_increment = 10
+        self.score_font = pygame.font.SysFont(None, 100)
+
+    def update(self, player):
+        if self.colliderect(food):
+            self.score += self.score_increment
+        if self.colliderect(mutation):
+            self.score -= self.score_increment
+        self.playerScore = self.score_font.render(str(self.score), True, 'white', 'black')
+
+    def draw(self):
+        screen.blit(self.playerScore, WIDTH / 4, HEIGHT / 8)
 
 
 class CameraGroup(pygame.sprite.Group):
@@ -240,6 +240,8 @@ def text_objects(text, font):
     textSurface = font.render(text, True, 'black')
     return textSurface, textSurface.get_rect()
 
+score = Score()
+score.__init__()
 
 def game_loop():
     # intro = False
@@ -253,6 +255,8 @@ def game_loop():
         screen.fill('white')
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
+
+        score.update() #not working
 
         if len(food_data) < 100:  # replenish food
             createFood_Data(food_data, random.randrange(150, 250))
@@ -268,9 +272,11 @@ def game_loop():
 
         camera.update()
         camera.custom_draw(bacteria)
-
+        
         all_sprites_list.update()
         all_sprites_list.draw(screen)
+
+        score.draw() #not working
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # if user hits red x button close window

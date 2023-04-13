@@ -188,6 +188,26 @@ class Score(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.playerScore, WIDTH / 4, HEIGHT / 8)
 
+    # draw a status bar for the player's health - percentage of health
+    def drawStatusBar(surface, x, y, health_pct):
+        # defaults for status bar dimension
+        BAR_WIDTH = 100
+        BAR_HEIGHT = 10
+        # check health does not fall below 0 - just in case...
+        if health_pct < 0:
+            health_pct = 0
+        # use health as percentage to calculate fill for status bar
+        bar_fill = (health_pct / 100) * BAR_WIDTH
+        # rectangles - outline of status bar &
+        bar_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
+        fill_rect = pygame.Rect(x, y, bar_fill, BAR_HEIGHT)
+        # draw health status bar to the game window - 1 specifies pixels for border width
+        if bar_fill < 40:
+            pygame.draw.rect(surface, 'red', fill_rect)
+        else:
+            pygame.draw.rect(surface, 'cyan', fill_rect)
+        pygame.draw.rect(surface, 'white', bar_rect, 1)
+
 
 class CameraGroup(pygame.sprite.Group):
     def __init__(self):
@@ -258,7 +278,7 @@ def game_loop():
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        score.update() #not working
+        #score.update() #not working
 
         if len(food_data) < 100:  # replenish food
             createFood_Data(food_data, random.randrange(150, 250))
@@ -278,7 +298,7 @@ def game_loop():
         all_sprites_list.update()
         all_sprites_list.draw(screen)
 
-        score.draw() #not working
+        #score.draw() #not working
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # if user hits red x button close window
@@ -291,7 +311,7 @@ def game_loop():
                     running = False
                     pygame.quit()
                     sys.exit()
-
+        #score.drawStatusBar(WINDOW, 10, 10, player.stShield)
         pygame.display.update()
         pygame.display.flip()
 

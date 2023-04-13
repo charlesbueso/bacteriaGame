@@ -189,6 +189,19 @@ class Score(pygame.sprite.Sprite):
     def draw(self):
         screen.blit(self.playerScore, WIDTH / 4, HEIGHT / 8)
 
+    # text output and render function - draw to game window
+    def textRender(surface, text, size, x, y):
+        # specify font for text render - uses found font and size of text
+        font = pygame.font.Font(font_match, size)
+        # surface for text pixels - TRUE = anti-aliased
+        text_surface = font.render(text, True, WHITE)
+        # get rect for text surface rendering
+        text_rect = text_surface.get_rect()
+        # specify a relative location for text
+        text_rect.midtop = (x, y)
+        # add text surface to location of text rect
+        surface.blit(text_surface, text_rect)
+
     # draw a status bar for the player's health - percentage of health
     def drawStatusBar(surface, x, y, health_pct):
         # defaults for status bar dimension

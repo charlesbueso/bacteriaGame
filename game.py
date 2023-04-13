@@ -180,6 +180,8 @@ class Score(pygame.sprite.Sprite):
         if self.colliderect(food):
             self.score += self.score_increment
         if self.colliderect(mutation):
+            self.score += self.score_increment * 3
+        if self.colliderect(Antidote):
             self.score -= self.score_increment
         self.playerScore = self.score_font.render(str(self.score), True, 'white', 'black')
 

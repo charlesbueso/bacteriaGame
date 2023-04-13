@@ -38,6 +38,7 @@ class Bacteria(pygame.sprite.Sprite):
         self.movey = 0  # move along Y
         self.frame = 0  # count frames
         self.speed = 1.5  # speed of the bacteria
+        self.stShield = 100
 
     def update(self):
 
@@ -262,8 +263,11 @@ def text_objects(text, font):
     textSurface = font.render(text, True, 'black')
     return textSurface, textSurface.get_rect()
 
+
 score = Score()
 score.__init__()
+player = Bacteria()
+
 
 def game_loop():
     # intro = False
@@ -278,7 +282,7 @@ def game_loop():
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        #score.update() #not working
+        # score.update() #not working
 
         if len(food_data) < 100:  # replenish food
             createFood_Data(food_data, random.randrange(150, 250))
@@ -294,11 +298,11 @@ def game_loop():
 
         camera.update()
         camera.custom_draw(bacteria)
-        
+
         all_sprites_list.update()
         all_sprites_list.draw(screen)
 
-        #score.draw() #not working
+        # score.draw() #not working
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # if user hits red x button close window
@@ -311,7 +315,7 @@ def game_loop():
                     running = False
                     pygame.quit()
                     sys.exit()
-        #score.drawStatusBar(WINDOW, 10, 10, player.stShield)
+        # score.drawStatusBar(screen, 10, 10, player.stShield) #not working
         pygame.display.update()
         pygame.display.flip()
 

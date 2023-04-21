@@ -12,6 +12,7 @@ pygame.font.init()
 WIDTH = 900
 HEIGHT = 750
 screen = pygame.display.set_mode([WIDTH, HEIGHT])
+defaultBar = pygame.Surface((300,40))
 timer = pygame.time.Clock()
 fps = 60
 bacteriaVelocity = 22
@@ -170,57 +171,42 @@ def checkCollision(player, food):  # not yet implemented
             return True
     return False
 
+class defaultBar(pygame.sprite.Sprite):
+    def __init__(self):
+        super().__init__()
+        topleft = ((WIDTH/2)*1.5)-150
+        self.image = pygame.Surface((300,40)) #bar
+        self.rect = pygame.Rect((topleft, 30),(300,40))
+        self.center = ((WIDTH/2)*1.5, 30) #center location for status bar
+
+
 
 class Score(pygame.sprite.Sprite):
     def __init__(self):
-        self.score = 0
-        self.score_increment = 10
-        self.score_font = pygame.font.SysFont(None, 100)
+        super().__init__()
+        topleft = ((WIDTH/2)*1.5)-150
+        self.totalPoints = 100 #default value
+        progressBar = pygame.Surface((self.totalPoints, 40)) #progress
+        self.image = progressBar
+        self.image.fill(foodColors[0])
+        self.rect = pygame.Rect((topleft, 30),(300,40))
+        self.center = ((WIDTH/2)*1.5, 30) #center location for status bar
 
-    def update(self, player):
-        if self.colliderect(food):
-            self.score += self.score_increment
-        if self.colliderect(mutation):
-            self.score += self.score_increment * 3
-        if self.colliderect(Antidote):
-            self.score -= self.score_increment
-        self.playerScore = self.score_font.render(str(self.score), True, 'white', 'black')
+    def addPoint(self, point):
+        self.totalPoints += point
+        if self.totalPoints> 300:
+            self.levelup()
+            self.update()
+    
+    def levelup(self):
+        self.totalPoints = 0 #reset points to zero
+        self.update()
+        #do something with progress to update level?
 
-    def draw(self):
-        screen.blit(self.playerScore, WIDTH / 4, HEIGHT / 8)
-
-    # text output and render function - draw to game window
-    def textRender(surface, text, size, x, y):
-        # specify font for text render - uses found font and size of text
-        font = pygame.font.Font(font_match, size)
-        # surface for text pixels - TRUE = anti-aliased
-        text_surface = font.render(text, True, WHITE)
-        # get rect for text surface rendering
-        text_rect = text_surface.get_rect()
-        # specify a relative location for text
-        text_rect.midtop = (x, y)
-        # add text surface to location of text rect
-        surface.blit(text_surface, text_rect)
-
-    # draw a status bar for the player's health - percentage of health
-    def drawStatusBar(surface, x, y, health_pct):
-        # defaults for status bar dimension
-        BAR_WIDTH = 100
-        BAR_HEIGHT = 10
-        # check health does not fall below 0 - just in case...
-        if health_pct < 0:
-            health_pct = 0
-        # use health as percentage to calculate fill for status bar
-        bar_fill = (health_pct / 100) * BAR_WIDTH
-        # rectangles - outline of status bar &
-        bar_rect = pygame.Rect(x, y, BAR_WIDTH, BAR_HEIGHT)
-        fill_rect = pygame.Rect(x, y, bar_fill, BAR_HEIGHT)
-        # draw health status bar to the game window - 1 specifies pixels for border width
-        if bar_fill < 40:
-            pygame.draw.rect(surface, 'red', fill_rect)
-        else:
-            pygame.draw.rect(surface, 'cyan', fill_rect)
-        pygame.draw.rect(surface, 'white', bar_rect, 1)
+    def update(self):
+        progressBar = pygame.Surface((self.totalPoints, 40)) #progress
+        self.image = progressBar
+        self.image.fill(foodColors[0])
 
 
 class CameraGroup(pygame.sprite.Group):
@@ -277,8 +263,6 @@ def text_objects(text, font):
     return textSurface, textSurface.get_rect()
 
 
-score = Score()
-score.__init__()
 player = Bacteria()
 
 
@@ -295,7 +279,6 @@ def game_loop():
         timer.tick(fps)
         mouse_x, mouse_y = pygame.mouse.get_pos()
 
-        # score.update() #not working
 
         if len(food_data) < 100:  # replenish food
             createFood_Data(food_data, random.randrange(150, 250))
@@ -308,14 +291,18 @@ def game_loop():
         if len(mutation_data) < 50:  # replenish mutation enemies
             createMutation_Data(mutation_data, random.randrange(10, 20))
             createMutation_Obj(mutation_data, mutation_group, camera)
-
+        
+        
         camera.update()
         camera.custom_draw(bacteria)
 
         all_sprites_list.update()
         all_sprites_list.draw(screen)
 
-        # score.draw() #not working
+#TODO: Add eating logic 1. Update score/progress bar 2. Increase bacteria size
+        #update score
+        score.addPoint(1)
+        #update bacteria size
 
         for event in pygame.event.get():
             if event.type == pygame.QUIT:  # if user hits red x button close window
@@ -367,6 +354,10 @@ antidote_group = pygame.sprite.Group()  # Define a sprite group ONLY for the ant
 mutation_group = pygame.sprite.Group()  # Define a sprite group ONLY for the mutation objects
 camera = CameraGroup()
 mutationCounter = 0
+standardBarSprite = defaultBar()
+all_sprites_list.add(standardBarSprite)
+score = Score()
+all_sprites_list.add(score)
 
 # menu
 game_intro()

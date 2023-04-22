@@ -69,16 +69,26 @@ class Antidote(pygame.sprite.Sprite):
         self.image = antidoteImage
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        # TODO:maybe needs an update function?
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.velocity.x = random.uniform(-5, 5)
+        self.velocity.y = random.uniform(-5, 5)
 
-    # def update(self):
-    #     checkCollision(self.rect.center, food_data)
-    #     mouse_x, mouse_y = pygame.mouse.get_pos()
-    #     dx = 0
-    #     dy = 0  
 
-    # Missing update function
-    # Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
+    def update(self): #TODO find out the actual dimensions of the surface so their movement is not restricted.
+         
+        # Update the position of the Antidote
+        self.rect.move_ip(self.velocity)
+
+        #Wrap the Antidote around the screen edges
+        #TODO update to bounce of the walls rather than wrapping
+        if self.rect.left > WIDTH:
+            self.rect.right = 0
+        elif self.rect.right < 0:
+            self.rect.left = WIDTH
+        if self.rect.top > HEIGHT:
+            self.rect.bottom = 0
+        elif self.rect.bottom < 0:
+            self.rect.top = HEIGHT
 
 
 def createAntidote_Data(antidote_list, n):
@@ -109,7 +119,7 @@ class food(pygame.sprite.Sprite):
         self.image.fill(color)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        # TODO:maybe needs an update function?
+
 
 
 def createFood_Data(food_list, n):  # creats a list of random food locations, colors, and sizes
@@ -140,7 +150,24 @@ class mutation(pygame.sprite.Sprite):
         self.image = mutationImage
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
-        # TODO:maybe needs an update function?
+        self.velocity = pygame.math.Vector2(0, 0)
+        self.velocity.x = random.uniform(-5, 5)
+        self.velocity.y = random.uniform(-5, 5)
+
+    def update(self): #TODO find out the actual dimensions of the surface so their movement is not restricted.
+        # Update the position of the Mutation
+        self.rect.move_ip(self.velocity)
+        
+        #Wrap the Mutation around the screen edges 
+        #TODO update to bounce of the walls rather than wrapping
+        if self.rect.left > WIDTH:
+            self.rect.right = 0
+        elif self.rect.right < 0:
+            self.rect.left = WIDTH
+        if self.rect.top > HEIGHT:
+            self.rect.bottom = 0
+        elif self.rect.bottom < 0:
+            self.rect.top = HEIGHT
 
 
 def createMutation_Data(mutation_list, n):  # creates a list of random food locations, colors, and sizes
@@ -185,7 +212,7 @@ class Score(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         topleft = ((WIDTH/2)*1.5)-150
-        self.totalPoints = 100 #default value
+        self.totalPoints = 0 #default value
         progressBar = pygame.Surface((self.totalPoints, 40)) #progress
         self.image = progressBar
         self.image.fill(foodColors[0])
@@ -284,11 +311,11 @@ def game_loop():
             createFood_Data(food_data, random.randrange(150, 250))
             createFood_Obj(food_data, food_group, camera)
 
-        if len(antidote_data) < 50:  # replenish antidote enemies
-            createAntidote_Data(antidote_data, random.randrange(40, 75))
+        if len(antidote_data) < 10:  # replenish antidote enemies
+            createAntidote_Data(antidote_data, random.randrange(10, 20))
             createAntidote_Obj(antidote_data, antidote_group, camera)
 
-        if len(mutation_data) < 50:  # replenish mutation enemies
+        if len(mutation_data) < 10:  # replenish mutation enemies
             createMutation_Data(mutation_data, random.randrange(10, 20))
             createMutation_Obj(mutation_data, mutation_group, camera)
         

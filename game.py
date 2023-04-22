@@ -25,6 +25,7 @@ antidote_data = []  # stores antidote positions and colors
 mutation_data = []  # stores mutation positions and colors
 antidoteImage = pygame.image.load("antidote.png")
 mutationImage = pygame.image.load("mutation.png")
+gameover = False
 
 
 class Bacteria(pygame.sprite.Sprite):
@@ -157,7 +158,7 @@ class mutation(pygame.sprite.Sprite):
     def update(self): #TODO find out the actual dimensions of the surface so their movement is not restricted.
         # Update the position of the Mutation
         self.rect.move_ip(self.velocity)
-        
+
         #Wrap the Mutation around the screen edges 
         #TODO update to bounce of the walls rather than wrapping
         if self.rect.left > WIDTH:
@@ -247,7 +248,7 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
         # background
-        self.ground_surf = pygame.image.load('grid-background.JPG').convert_alpha()
+        self.ground_surf = pygame.image.load('grid-background.jpg').convert_alpha()
         self.ground_rect = self.ground_surf.get_rect(topleft=(0, 0))
 
     def center_target_camera(self, target):
@@ -294,37 +295,65 @@ player = Bacteria()
 
 
 def game_loop():
-    # intro = False
+    startTime = pygame.time.get_ticks()
+    minutes = 0
+    seconds = 0
+    timedLevel = 60000*3 # 3 minute
     running = True
-    while running:
-
+    gameover = False
+    while running:      
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
-
-        screen.fill('white')
-        timer.tick(fps)
-        mouse_x, mouse_y = pygame.mouse.get_pos()
-
-
-        if len(food_data) < 100:  # replenish food
-            createFood_Data(food_data, random.randrange(150, 250))
-            createFood_Obj(food_data, food_group, camera)
-
-        if len(antidote_data) < 10:  # replenish antidote enemies
-            createAntidote_Data(antidote_data, random.randrange(10, 20))
-            createAntidote_Obj(antidote_data, antidote_group, camera)
-
-        if len(mutation_data) < 10:  # replenish mutation enemies
-            createMutation_Data(mutation_data, random.randrange(10, 20))
-            createMutation_Obj(mutation_data, mutation_group, camera)
         
         
-        camera.update()
-        camera.custom_draw(bacteria)
 
-        all_sprites_list.update()
-        all_sprites_list.draw(screen)
+        if gameover == False:
+
+            screen.fill('white')
+            timer.tick(fps)
+            mouse_x, mouse_y = pygame.mouse.get_pos()
+
+            #countdown timer
+            currentTime = pygame.time.get_ticks() # get current time
+
+            # check if time limit has been reached
+            if currentTime - startTime > timedLevel:
+                gameover = True
+                print("game over")
+            else:
+                # calculate time remaining
+                time_remaining = timedLevel - (currentTime - startTime)
+                minutes = int(time_remaining / 1000 / 60) # calculate minutes
+                seconds = int(time_remaining / 1000 % 60) # calculate seconds
+
+                # render time remaining on screen
+                font = pygame.font.Font('Orbitron-Regular.ttf', 60)
+                time = font.render("{}:{}".format(str(minutes).zfill(2), str(seconds).zfill(2)), True, foodColors[0])
+                screen.blit(time, time.get_rect())
+
+            if len(food_data) < 100:  # replenish food
+                createFood_Data(food_data, random.randrange(150, 250))
+                createFood_Obj(food_data, food_group, camera)
+
+            if len(antidote_data) < 10:  # replenish antidote enemies
+                createAntidote_Data(antidote_data, random.randrange(10, 20))
+                createAntidote_Obj(antidote_data, antidote_group, camera)
+
+            if len(mutation_data) < 10:  # replenish mutation enemies
+                createMutation_Data(mutation_data, random.randrange(10, 20))
+                createMutation_Obj(mutation_data, mutation_group, camera)
+            
+            
+            camera.update()
+            camera.custom_draw(bacteria)
+
+            all_sprites_list.update()
+            all_sprites_list.draw(screen)
+        else:
+            print("gameover")
+            screen.fill("RED")
+
 
 #TODO: Add eating logic 1. Update score/progress bar 2. Increase bacteria size
         #update score
@@ -342,14 +371,13 @@ def game_loop():
                     running = False
                     pygame.quit()
                     sys.exit()
-        # score.drawStatusBar(screen, 10, 10, player.stShield) #not working
+                    
         pygame.display.update()
         pygame.display.flip()
 
 
 def game_intro():
     global buttonList
-
     intro = True
     while intro:
         for event in pygame.event.get():
@@ -369,6 +397,7 @@ def game_intro():
 
         pygame.display.update()
         timer.tick(15)
+
 
 
 pygame.init()

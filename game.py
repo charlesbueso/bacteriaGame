@@ -15,7 +15,6 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 defaultBar = pygame.Surface((300,40))
 timer = pygame.time.Clock()
 fps = 60
-bacteriaVelocity = 22
 pygame.display.set_caption("Bacteria Game!")
 pygame.mouse.set_visible(True)
 foodColors = [(155, 93, 229), (241, 91, 181), (254, 228, 64), (0, 187, 249), (0, 245, 212)]  # food colors
@@ -26,12 +25,13 @@ mutation_data = []  # stores mutation positions and colors
 antidoteImage = pygame.image.load("antidote.png")
 mutationImage = pygame.image.load("mutation.png")
 gameover = False
+bacteriaSize = (30,30)
 
 
 class Bacteria(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.image = pygame.Surface((30, 30))
+        self.image = pygame.Surface(bacteriaSize)
         self.image.fill('red')
         self.rect = self.image.get_rect()
         # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
@@ -41,6 +41,7 @@ class Bacteria(pygame.sprite.Sprite):
         self.frame = 0  # count frames
         self.speed = 1.5  # speed of the bacteria
         self.stShield = 100
+        self.mutation_counter = 0
 
     def update(self):
 
@@ -60,19 +61,21 @@ class Bacteria(pygame.sprite.Sprite):
 
             # Missing update function
     # Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
+        
 
 
 # TODO: Add movement of antidotes? and randomize size
 class Antidote(pygame.sprite.Sprite):
-    def __init__(self, x, y, color, group):
+    def __init__(self, x, y, color, group, size):
         super().__init__(group)
-        self.image = pygame.Surface((30, 30))
-        self.image = antidoteImage
+        self.image = pygame.Surface(size)
+        self.image = pygame.transform.scale(antidoteImage,size)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.velocity = pygame.math.Vector2(0, 0)
         self.velocity.x = random.uniform(-5, 5)
         self.velocity.y = random.uniform(-5, 5)
+        self.size = size
 
 
     def update(self): #TODO find out the actual dimensions of the surface so their movement is not restricted.
@@ -92,8 +95,8 @@ class Antidote(pygame.sprite.Sprite):
             self.rect.top = HEIGHT
 
 
-def createAntidote_Data(antidote_list, n):
-    for i in range(n):
+def createAntidote_Data(antidote_list):
+    while len(antidote_list) < 15:
         while True:
             x = random.randrange(0, 1200)
             y = random.randrange(0, 1500)
@@ -107,11 +110,11 @@ def createAntidote_Data(antidote_list, n):
 
         antidote_list.append((x, y, antidoteColor))  # add data to list
 
-
 def createAntidote_Obj(antidote_list, antidoteGroup, cameraGroup):
     for i in range(len(antidote_list)):
-        antidoteGroup.add(Antidote(antidote_list[i][0], antidote_list[i][1], antidote_list[i][2], cameraGroup))
-
+        randomSize = random.randint(bacteriaSize[0]+30,bacteriaSize[0]+100)
+        antidoteGroup.add(Antidote(antidote_list[i][0], antidote_list[i][1], antidote_list[i][2], cameraGroup, (randomSize, randomSize)))
+    
 
 class food(pygame.sprite.Sprite):
     def __init__(self, x, y, color, group):
@@ -306,8 +309,6 @@ def game_loop():
             if event.type == pygame.QUIT:
                 running = False
         
-        
-
         if gameover == False:
 
             screen.fill('white')
@@ -321,6 +322,7 @@ def game_loop():
             if currentTime - startTime > timedLevel:
                 gameover = True
                 print("game over")
+                #game_intro()
             else:
                 # calculate time remaining
                 time_remaining = timedLevel - (currentTime - startTime)
@@ -332,19 +334,28 @@ def game_loop():
                 time = font.render("{}:{}".format(str(minutes).zfill(2), str(seconds).zfill(2)), True, foodColors[0])
                 screen.blit(time, time.get_rect())
 
-            if len(food_data) < 100:  # replenish food
+            """ if len(food_data) < 100:  # replenish food
                 createFood_Data(food_data, random.randrange(150, 250))
-                createFood_Obj(food_data, food_group, camera)
+                createFood_Obj(food_data, food_group, camera) """
 
-            if len(antidote_data) < 10:  # replenish antidote enemies
-                createAntidote_Data(antidote_data, random.randrange(10, 20))
+            if len(antidote_data) < 15:  # replenish antidote enemies
+                createAntidote_Data(antidote_data)
                 createAntidote_Obj(antidote_data, antidote_group, camera)
 
-            if len(mutation_data) < 10:  # replenish mutation enemies
+            """ if len(mutation_data) < 10:  # replenish mutation enemies
                 createMutation_Data(mutation_data, random.randrange(10, 20))
-                createMutation_Obj(mutation_data, mutation_group, camera)
+                createMutation_Obj(mutation_data, mutation_group, camera) """
             
+            #check collision
+            """ bacteriaAntidoteCollision = pygame.sprite.spritecollide(player, all_sprites_list, True)
             
+            if bacteriaAntidoteCollision == True:
+                antidoteCollide = bacteriaAntidoteCollision[0]
+                if antidoteCollide.size > bacteriaSize[0]:
+                    gameover = True
+                else:
+                    continue """
+
             camera.update()
             camera.custom_draw(bacteria)
 
@@ -374,6 +385,7 @@ def game_loop():
                     
         pygame.display.update()
         pygame.display.flip()
+
 
 
 def game_intro():

@@ -391,8 +391,7 @@ def tutorial_loop():
                 pygame.display.update()
 
             else:
-                print("gameover")
-                screen.fill("RED")
+                game_intro()
                 pygame.display.update()
 
 

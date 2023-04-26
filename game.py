@@ -25,10 +25,11 @@ mutation_data = []  # stores mutation positions and colors
 antidoteImages = [pygame.image.load("antidote.png"), pygame.image.load("RedGloop.PNG"), pygame.image.load("BluePill.PNG"), pygame.image.load("GreenPill.PNG"),pygame.image.load("PinkPill.PNG")]
 mutationImage = pygame.image.load("mutation.png")
 bacteriaImages = [pygame.image.load("bacteriaPng.png"), pygame.image.load("BlueBacteria.PNG"), pygame.image.load("GreenBacteria.PNG")]
-
+backgroundImage = pygame.image.load('grid-background.png')
+backgroundImage = pygame.transform.scale(backgroundImage,(WIDTH,HEIGHT))
 
 gameover = False
-bacteriaSize = (30,30)
+bacteriaSize = (100,100)
 
 
 class Bacteria(pygame.sprite.Sprite):
@@ -45,6 +46,7 @@ class Bacteria(pygame.sprite.Sprite):
         self.speed = 1.5  # speed of the bacteria
         self.stShield = 100
         self.mutation_counter = 0
+        self.size = bacteriaSize
 
     def update(self):
 
@@ -64,10 +66,41 @@ class Bacteria(pygame.sprite.Sprite):
 
             # Missing update function
     # Will update movement of antidotes, as well as random spawns(?) and size mutations(?)
-        
 
+def eat(self,antidoteSize):
+    addedSize = antidoteSize[0]
+    print(addedSize)
+    self.image = pygame.Surface(((bacteriaSize[0]+addedSize), (bacteriaSize[0]+addedSize)))
+    self.image = pygame.transform.scale(bacteriaImages[0],(bacteriaSize[0]+addedSize, bacteriaSize[0]+addedSize))
+    self.rect = self.image.get_rect()
+    self.size = ((bacteriaSize[0]+addedSize), (bacteriaSize[0]+addedSize))
+    self.mutation_counter += math.log(addedSize)
 
-# TODO: Add movement of antidotes? and randomize size
+def check_collision(bacteria, antidotes_group):
+    # Loop through all the Antidote sprites in the group
+    for antidote in antidotes_group:
+        # Check for collision between the Bacteria and the Antidote sprite
+        if pygame.sprite.collide_rect(bacteria, antidote):
+            # Check if the Antidote is smaller than the Bacteria
+            if antidote.size < bacteria.size:
+                # Increase the size of the Bacteria relative to the size of the Antidote
+                bacteria.size += antidote.size
+                bacteria.mutation_counter += 1
+                bacteriaSize = ((bacteria.size[0] + antidote.size[0]), (bacteria.size[0] + antidote.size[0]))
+                bacteria.image = pygame.Surface(bacteriaSize)
+                bacteria.image = pygame.transform.scale(bacteriaImages[0],bacteriaSize)
+                bacteria.rect = bacteria.image.get_rect()
+                # Remove the Antidote sprite from the group
+                antidotes_group.remove(antidote)
+                antidote.kill()
+                return True
+            else:
+                print('gameover')
+                # The Antidote is bigger than the Bacteria, return False to indicate failure
+                return False
+    # No collision detected, return True to indicate success
+    return True
+
 class Antidote(pygame.sprite.Sprite):
     def __init__(self, x, y, color, group, size):
         super().__init__(group)
@@ -116,7 +149,7 @@ def createAntidote_Data(antidote_list):
 
 def createAntidote_Obj(antidote_list, antidoteGroup, cameraGroup):
     for i in range(len(antidote_list)):
-        randomSize = random.randint(bacteriaSize[0]+30,bacteriaSize[0]+100)
+        randomSize = random.randint(bacteriaSize[0]-50,bacteriaSize[0]+20)
         antidoteGroup.add(Antidote(antidote_list[i][0], antidote_list[i][1], antidote_list[i][2], cameraGroup, (randomSize, randomSize)))
     
 
@@ -200,12 +233,6 @@ def createMutation_Obj(mutation_list, mutationGroup, cameraGroup):  # creates fo
         mutationGroup.add(mutation(mutation_list[i][0], mutation_list[i][1], cameraGroup))
 
 
-def checkCollision(player, food):  # not yet implemented
-    for i in range(len(food)):
-        if food[i][0] == player.x and food[i][1] == player.y:
-            return True
-    return False
-
 class defaultBar(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
@@ -255,8 +282,6 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
         # background
-        backgroundImage = pygame.image.load('grid-background.jpg')
-        backgroundImage = pygame.transform.scale(backgroundImage,(WIDTH,HEIGHT))
         self.ground_surf = backgroundImage.convert_alpha()
         self.ground_rect = self.ground_surf.get_rect(topleft=(0, 0))
 
@@ -265,6 +290,7 @@ class CameraGroup(pygame.sprite.Group):
         self.offset.y = target.rect.centery - self.half_h
 
     def custom_draw(self, player):
+
         self.center_target_camera(player)
 
         # ground
@@ -275,6 +301,7 @@ class CameraGroup(pygame.sprite.Group):
         for sprite in sorted(self.sprites(), key=lambda sprite: sprite.rect.centery):
             offset_pos = sprite.rect.topleft - self.offset
             self.display_surface.blit(sprite.image, offset_pos)
+
 
 
 def button(message, x, y, width, height, inactiveColor, activeColor, action=None):
@@ -300,8 +327,6 @@ def text_objects(text, font):
     return textSurface, textSurface.get_rect()
 
 
-player = Bacteria()
-
 
 def game_loop():
     startTime = pygame.time.get_ticks()
@@ -310,7 +335,10 @@ def game_loop():
     timedLevel = 60000*3 # 3 minute
     running = True
     gameover = False
-    while running:      
+    bactPos = False
+
+    while running:
+
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -344,7 +372,7 @@ def game_loop():
                 createFood_Data(food_data, random.randrange(150, 250))
                 createFood_Obj(food_data, food_group, camera) """
 
-            if len(antidote_data) < 15:  # replenish antidote enemies
+            if len(antidote_group) < 10:  # replenish antidote enemies
                 createAntidote_Data(antidote_data)
                 createAntidote_Obj(antidote_data, antidote_group, camera)
 
@@ -353,18 +381,37 @@ def game_loop():
                 createMutation_Obj(mutation_data, mutation_group, camera) """
             
             #check collision
-            bacteriaAntidoteCollision = pygame.sprite.spritecollide(player, all_sprites_list, False)
-            print(bacteriaAntidoteCollision)
-            """if bacteriaAntidoteCollision == True:
+
+            for antidote in antidote_group:
+            # Check for collision between the Bacteria and the Antidote sprite
+                if pygame.sprite.collide_rect(bacteria, antidote):
+                    antidote.kill()
+                    print(antidote.size)
+                    break
+            """
+            if len(bacteriaAntidoteCollision) > 0:
+                #collision found
                 antidoteCollide = bacteriaAntidoteCollision[0]
-                if antidoteCollide.size > bacteriaSize[0]:
-                    gameover = True
+                print('collision')
+                print(type(antidoteCollide))
+                if antidoteCollide.size > bacteriaSize:
+                    
+                    print(antidoteCollide.size)
+                    #gameover = True
+                    pass
                 else:
-                    continue """
+                    antidoteSize = antidoteCollide.size
+                    bacteria.eat(antidoteSize)
+                    print("ate")
+                    pass
+            else:
+                #print('0000')
+                pass """
+            
+            #check_collision(bacteria,antidote_group)
 
             camera.update()
             camera.custom_draw(bacteria)
-
             all_sprites_list.update()
             all_sprites_list.draw(screen)
         else:

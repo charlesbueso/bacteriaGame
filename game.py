@@ -15,7 +15,7 @@ screen = pygame.display.set_mode([WIDTH, HEIGHT])
 defaultBar = pygame.Surface((300,40))
 timer = pygame.time.Clock()
 fps = 60
-pygame.display.set_caption("Bacteria Game!")
+pygame.display.set_caption("E Colide")
 pygame.mouse.set_visible(True)
 foodColors = [(155, 93, 229), (241, 91, 181), (254, 228, 64), (0, 187, 249), (0, 245, 212)]  # food colors
 antidoteColor = (0, 0, 0)  # antidote color: black
@@ -326,6 +326,74 @@ def text_objects(text, font):
     textSurface = font.render(text, True, 'black')
     return textSurface, textSurface.get_rect()
 
+def tutorial_loop():
+        runTutorial = True
+        finishTutorial = False
+        blue = (0, 71, 171)
+        green = (15, 82, 186)
+        blue2 = (0, 150, 255)
+        while runTutorial:
+
+
+            for event in pygame.event.get():
+                 if event.type == pygame.QUIT:
+                    runTutorial = False
+
+            if finishTutorial == False:
+                screen.fill('white')
+                largeTexts = pygame.font.Font('titlefont.ttf', 165)
+                TextSurf, TextRect = text_objects("E Colide", largeTexts)
+                TextRect.center = ((WIDTH / 2), (HEIGHT / 8))
+                screen.blit(TextSurf, TextRect)
+                font1 = pygame.font.Font('freesansbold.ttf', 50)
+                text2 = font1.render('Rules', True, blue)
+                TextRect.center = ((WIDTH / 2) - 50 , ((HEIGHT / 3) + 45))
+                screen.blit(text2, TextRect)
+
+                font2 = pygame.font.Font('freesansbold.ttf', 25)
+
+                line1 = font2.render('1) You are taking on the role of a bacteria! To move around the', True, green)
+                TextRect.center = ((WIDTH / 2) - 25, ((HEIGHT / 3) + 125))
+                screen.blit(line1, TextRect)
+
+                line2 = font2.render('     grid, drag your mouse.', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 165))
+                screen.blit(line2, TextRect)
+
+                line3 = font2.render('2) Each round will last 3 minutes long. Time is indicated by the', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 235))
+                screen.blit(line3, TextRect)
+
+                line4 = font2.render('    timer in the top left corner.', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 275))
+                screen.blit(line4, TextRect)
+
+                line4 = font2.render('3) Absorb antidotes that are smaller to increase your mutation', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 345))
+                screen.blit(line4, TextRect)
+
+                line5 = font2.render('    counter! Absorbing bigger antidotes will decrease the', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 385))
+                screen.blit(line5, TextRect)
+
+                line6 = font2.render('    number of your mutations! ', True, green)
+                TextRect.center = ((WIDTH / 2)- 25, ((HEIGHT / 3) + 425))
+                screen.blit(line6, TextRect)
+
+                line7 = font2.render('The objective of the game is to have the highest mutation', True, blue2)
+                TextRect.center = ((WIDTH / 2)- 5, ((HEIGHT / 3) + 495))
+                screen.blit(line7, TextRect)
+
+                line8 = font2.render('counter possible!', True, blue2)
+                TextRect.center = ((WIDTH / 2), ((HEIGHT / 3) + 535))
+                screen.blit(line8, TextRect)
+
+                pygame.display.update()
+
+            else:
+                print("gameover")
+                screen.fill("RED")
+                pygame.display.update()
 
 
 def game_loop():
@@ -451,13 +519,13 @@ def game_intro():
                 sys.exit()
         screen.fill('white')
         largeText = pygame.font.Font('titlefont.ttf', 100)
-        TextSurf, TextRect = text_objects("Bacteria Game", largeText)
-        TextRect.center = ((WIDTH / 2), (HEIGHT / 2))
+        TextSurf, TextRect = text_objects("E Colide", largeText)
+        TextRect.center = ((WIDTH / 2), (HEIGHT / 4))
         screen.blit(TextSurf, TextRect)
 
         buttonList = [
-            button("PLAY", 385, 515, 140, 75, "yellow", "green", game_loop),
-            button("TUTORIAL", 350, 630, 220, 75, "yellow", "green")
+            button("PLAY", 340, 305, 220, 75, "yellow", "green", game_loop),
+            button("RULES", 340, 420, 220, 75, "yellow", "green", tutorial_loop)
         ]
 
         pygame.display.update()

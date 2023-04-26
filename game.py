@@ -22,8 +22,11 @@ antidoteColor = (0, 0, 0)  # antidote color: black
 food_data = []  # stores food positions and colors
 antidote_data = []  # stores antidote positions and colors
 mutation_data = []  # stores mutation positions and colors
-antidoteImage = pygame.image.load("antidote.png")
+antidoteImages = [pygame.image.load("antidote.png"), pygame.image.load("RedGloop.PNG"), pygame.image.load("BluePill.PNG"), pygame.image.load("GreenPill.PNG"),pygame.image.load("PinkPill.PNG")]
 mutationImage = pygame.image.load("mutation.png")
+bacteriaImages = [pygame.image.load("bacteriaPng.png"), pygame.image.load("BlueBacteria.PNG"), pygame.image.load("GreenBacteria.PNG")]
+
+
 gameover = False
 bacteriaSize = (30,30)
 
@@ -32,7 +35,7 @@ class Bacteria(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
         self.image = pygame.Surface(bacteriaSize)
-        self.image.fill('red')
+        self.image = pygame.transform.scale(bacteriaImages[0],bacteriaSize)
         self.rect = self.image.get_rect()
         # checks images and get rect... self.rect.center = (winWidth / 2, winHeight / 2) #self.rect.bottom = winHeight
         self.rect.center = (WIDTH / 2, HEIGHT / 2)
@@ -69,7 +72,8 @@ class Antidote(pygame.sprite.Sprite):
     def __init__(self, x, y, color, group, size):
         super().__init__(group)
         self.image = pygame.Surface(size)
-        self.image = pygame.transform.scale(antidoteImage,size)
+        randomImage = random.randint(0,len(antidoteImages)-1)
+        self.image = pygame.transform.scale(antidoteImages[randomImage],size)
         self.rect = self.image.get_rect()
         self.rect.center = (x, y)
         self.velocity = pygame.math.Vector2(0, 0)
@@ -251,7 +255,9 @@ class CameraGroup(pygame.sprite.Group):
         self.half_h = self.display_surface.get_size()[1] // 2
 
         # background
-        self.ground_surf = pygame.image.load('grid-background.jpg').convert_alpha()
+        backgroundImage = pygame.image.load('grid-background.jpg')
+        backgroundImage = pygame.transform.scale(backgroundImage,(WIDTH,HEIGHT))
+        self.ground_surf = backgroundImage.convert_alpha()
         self.ground_rect = self.ground_surf.get_rect(topleft=(0, 0))
 
     def center_target_camera(self, target):
@@ -347,9 +353,9 @@ def game_loop():
                 createMutation_Obj(mutation_data, mutation_group, camera) """
             
             #check collision
-            """ bacteriaAntidoteCollision = pygame.sprite.spritecollide(player, all_sprites_list, True)
-            
-            if bacteriaAntidoteCollision == True:
+            bacteriaAntidoteCollision = pygame.sprite.spritecollide(player, all_sprites_list, False)
+            print(bacteriaAntidoteCollision)
+            """if bacteriaAntidoteCollision == True:
                 antidoteCollide = bacteriaAntidoteCollision[0]
                 if antidoteCollide.size > bacteriaSize[0]:
                     gameover = True
